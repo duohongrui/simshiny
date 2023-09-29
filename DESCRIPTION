@@ -9,7 +9,8 @@ Authors@R:
 Description: What the package does (one paragraph).
 License: GPL (>= 3)
 Depends: R (>= 4.0),
-         randomForest
+         randomForest,
+         ggplot2
 Imports: 
     assertthat,
     config (>= 0.3.1),
@@ -24,7 +25,6 @@ Imports:
     S4Vectors,
     shiny (>= 1.7.2),
     shinycssloaders,
-    shinyFeedback,
     shinythemes,
     shinyWidgets,
     splatter,
@@ -32,8 +32,13 @@ Imports:
     stringr,
     tibble,
     tidyr,
-    tools
+    tools,
+    umap
 Encoding: UTF-8
 LazyData: true
 LazyDataCompression: bzip2
 RoxygenNote: 7.2.3
+Suggests: 
+    edgeR,
+    patchwork,
+    Seurat
