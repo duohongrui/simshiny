@@ -1,0 +1,98 @@
+functionality_check <- function(method, selected_functions){
+  method_functions <- list("group" = c("SPARSim",
+                                       "Splat",
+                                       "SCRIP-GP-trendedBCV",
+                                       "SCRIP-GP-commonBCV",
+                                       "SCRIP-BGP-commonBCV",
+                                       "SCRIP-BP",
+                                       "SCRIP-BGP-trendedBCV",
+                                       "SplatPop",
+                                       "SplatPop-paths",
+                                       "Splat-paths",
+                                       "SCRIP-paths",
+                                       "scDesign3-tree",
+                                       "VeloSim",
+                                       "scDesign",
+                                       "Lun",
+                                       "muscat",
+                                       "scDesign3",
+                                       "SRTsim",
+                                       "scDesign2"),
+                           "DEGs" = c("SPARSim",
+                                      "Splat",
+                                      "SCRIP-GP-trendedBCV",
+                                      "SCRIP-GP-commonBCV",
+                                      "SCRIP-BGP-commonBCV",
+                                      "SCRIP-BP",
+                                      "SCRIP-BGP-trendedBCV",
+                                      "SplatPop",
+                                      "SplatPop-paths",
+                                      "Splat-paths",
+                                      "SCRIP-paths",
+                                      "Lun",
+                                      "scDesign",
+                                      "muscat"),
+                           "batch" = c("SPARSim",
+                                       "Splat",
+                                       "SCRIP-GP-trendedBCV",
+                                       "SCRIP-GP-commonBCV",
+                                       "SCRIP-BGP-commonBCV",
+                                       "SCRIP-BP",
+                                       "SCRIP-BGP-trendedBCV",
+                                       "SplatPop",
+                                       "SplatPop-paths",
+                                       "Splat-paths",
+                                       "SCRIP-paths",
+                                       "scDesign3-tree",
+                                       "scDesign3",
+                                       "Lun2"),
+                           "trajectory" = c("SplatPop-paths",
+                                            "Splat-paths",
+                                            "SCRIP-paths",
+                                            "scDesign3-tree",
+                                            "VeloSim",
+                                            "dyntoy"),
+                           "matrix" = c("SPARSim",
+                                        "Splat",
+                                        "SCRIP-GP-trendedBCV",
+                                        "SCRIP-GP-commonBCV",
+                                        "SCRIP-BGP-commonBCV",
+                                        "SCRIP-BP",
+                                        "SCRIP-BGP-trendedBCV",
+                                        "SplatPop",
+                                        "SplatPop-paths",
+                                        "Splat-paths",
+                                        "SCRIP-paths",
+                                        "scDesign3-tree",
+                                        "VeloSim",
+                                        "dyntoy",
+                                        "scDesign",
+                                        "Lun",
+                                        "muscat",
+                                        "scDesign3",
+                                        "SRTsim",
+                                        "scDesign2",
+                                        "Lun2",
+                                        "zinbwave",
+                                        "Kersplat",
+                                        "dropsim"),
+                           "spatial" = c("SRTsim",
+                                         "scDesign3"))
+  failed_functions <- NULL
+  approved_functions <- NULL
+  if(is.null(selected_functions) | "" %in% selected_functions){
+    return(list(approved_functions = NULL,
+                failed_functions = NULL))
+  }else{
+    for(i in selected_functions){
+      sub_functions <- method_functions[[i]]
+      if(method %in% sub_functions){
+        approved_functions <- append(approved_functions, i)
+      }else{
+        failed_functions <- append(failed_functions, i)
+      }
+    }
+    return(list(approved_functions = approved_functions,
+                failed_functions = failed_functions))
+  }
+}

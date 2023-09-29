@@ -1,0 +1,39 @@
+Package: simshiny
+Title: An Amazing Shiny App
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "firstname",
+           family = "lastname",
+           role = c("aut", "cre"),
+           email = "your@email.com")
+Description: What the package does (one paragraph).
+License: GPL (>= 3)
+Depends: R (>= 4.0),
+         randomForest
+Imports: 
+    assertthat,
+    config (>= 0.3.1),
+    dplyr,
+    formattable,
+    golem (>= 0.4.0),
+    Hmisc,
+    methods,
+    openxlsx,
+    purrr,
+    RColorBrewer,
+    S4Vectors,
+    shiny (>= 1.7.2),
+    shinycssloaders,
+    shinyFeedback,
+    shinythemes,
+    shinyWidgets,
+    splatter,
+    stats,
+    stringr,
+    tibble,
+    tidyr,
+    tools
+Encoding: UTF-8
+LazyData: true
+LazyDataCompression: bzip2
+RoxygenNote: 7.2.3

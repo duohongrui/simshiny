@@ -1,0 +1,65 @@
+.home-text-padding {
+  padding-top: 25px;
+	padding-right: 50px;
+	padding-left: 300px;
+}
+
+/*** collapse panels ***/
+.panel-heading {
+  transition: all 0.5s;
+}
+
+.panel-collapse > div {
+  padding: 10px 15px;
+  width:100%;
+}
+
+/* heading arrow */
+.panel-heading i {
+  transition: all 0.5s;
+  transform: rotate(0deg);
+}
+
+.panel-heading.collapsed i {
+	transform: rotate(-90deg);
+}
+
+/* navbar title */
+.navbar-brand {
+  font-size: 35px;
+  margin: 0px;
+}
+
+/* navbar menu size */
+.navbar .navbar-nav>li a {
+ font-size: 17px;
+}
+
+/* h5 font */
+h5 {
+  font-weight: bold;
+}
+
+
+/**********************/
+/***** Questions ******/
+/**********************/
+.shiny-input-container:not(.shiny-input-container-inline) {
+  width: auto !important;
+  max-width: 100%;
+}
+
+
+#loadmessage {
+/*  position: fixed;
+  top: 5px;
+  left: 0px;
+  width: 100%;
+  text-align: center; */
+  padding: 5px 0px 18px 0px;
+  font-weight: bold;
+  font-size: 18px;
+  color: #000000;
+  z-index: 105;
+
+}
