@@ -15,7 +15,7 @@ method_choice_ui <- function(){
         radioGroupButtons(
           inputId = "determine_function",
           label = tags$h5("Do you want to simulate a dataset with cell groups, cell batches, DEGs, or trajectories?"),
-          choices = c("Yes" = "yes", "No" = "no"),
+          choices = c("Yes" = "yes", "No/I don't know" = "no"),
           selected = character(0)
         ),
         conditionalPanel(

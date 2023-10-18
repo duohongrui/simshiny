@@ -78,8 +78,8 @@ online_simulation_ui <- function(){
         conditionalPanel(condition = "input.functionality.indexOf('group') > -1",
                          numericInput(inputId = "group_num",
                                       label = tags$h5("Cell group number"),
-                                      value = 1,
-                                      min = 2,
+                                      value = 2,
+                                      min = 1,
                                       max = 100)
         ),
         ### DEGs proportion
@@ -94,8 +94,8 @@ online_simulation_ui <- function(){
         conditionalPanel(condition = "input.functionality.indexOf('batch') > -1",
                          numericInput(inputId = "batch_num",
                                       label = tags$h5("Cell batch number"),
-                                      value = 1,
-                                      min = 2,
+                                      value = 2,
+                                      min = 1,
                                       max = 100),
         ),
 

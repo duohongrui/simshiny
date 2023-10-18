@@ -110,11 +110,7 @@ app_server <- function(input, output, session) {
   ############################################################################
   ############################### Simulation #################################
   ############################################################################
-
-  toListen <- reactive({
-    list(input$functionality, input$choose_method)
-  })
-  observeEvent(toListen(), {
+  observeEvent(input$choose_method, {
     method <- input$choose_method
     ############################### Cell or gene number setting check
     check_data_size <- parameter_name_check(method, other_prior = list(cell_num = 1000, gene_num = 1000), original_name = TRUE)
@@ -145,8 +141,26 @@ app_server <- function(input, output, session) {
                          value = 0,
                          min = 0,
                          max = 0)
+    }else{
+      updateNumericInput(session = session,
+                         inputId = "cell_num_simulate",
+                         label = "Cell Number",
+                         value = 1000,
+                         min = 1,
+                         max = 30000)
+      updateNumericInput(session = session,
+                         inputId = "gene_num_simulate",
+                         label = "Gene Number",
+                         value = 1000,
+                         min = 1,
+                         max = 30000)
     }
-
+  })
+  toListen <- reactive({
+    list(input$functionality, input$choose_method)
+  })
+  observeEvent(toListen(), {
+    method <- input$choose_method
     ############################### Match method and functionality and return to users
     selected_functionality <- input$functionality
     functions_check <- functionality_check(method = method,
@@ -183,6 +197,36 @@ app_server <- function(input, output, session) {
                                          "Trajectory" = "trajectory",
                                          "Spatial transcriptome" = "spatial"),
                              selected = selected_functionality)
+    ############################### Update prior settings when the functionality is not defined
+    if(!"group" %in% selected_functionality){
+      if(method == "muscat"){
+        updateNumericInput(session,
+                           inputId = "group_num",
+                           value = 2,
+                           min = 1,
+                           max = 2)
+      }else{
+        updateNumericInput(session,
+                           inputId = "group_num",
+                           value = 2,
+                           min = 1,
+                           max = 100)
+      }
+    }
+    if(!"DEGs" %in% selected_functionality){
+      updateNumericInput(session,
+                         inputId = "DEGs_prop",
+                         value = 0.2,
+                         min = 0,
+                         max = 1)
+    }
+    if(!"batch" %in% selected_functionality){
+      updateNumericInput(session,
+                         inputId = "batch_num",
+                         value = 2,
+                         min = 1,
+                         max = 100)
+    }
   })
 
   ############################### Upload data and prior information
@@ -298,6 +342,9 @@ app_server <- function(input, output, session) {
     prior_info <- determine_prior()
     ### method
     method <- input$choose_method
+    if(method == "VeloSim"){
+      require(VeloSim)
+    }
     ### cell and gene number
     cell_num <- input$cell_num_simulate
     if(cell_num == 0){
@@ -346,45 +393,51 @@ app_server <- function(input, output, session) {
       ########################### Estimate Parameters ############################
       ############################################################################
       env <- asNamespace("simmethods")
-      estimate_function_name <- paste0(sub_method, "_estimation")
-      assign(estimate_function_name, get(estimate_function_name, envir = env))
-      ### prior information for estimation when it is unavailable
-      estimate_prior <- simulate_prior
-      if(sub_method == "scDesign3"){
-        if(is.null(prior_info$group.condition)){
-          if(!is.null(prior_info$group_num)){
-            estimate_prior[["group.condition"]] <- sample(1:prior_info$group_num, ncol(ref_data), TRUE)
-          }else{
-            estimate_prior[["group.condition"]] <- sample(1:2, ncol(ref_data), TRUE)
+      if(sub_method == "scDesign"){
+        parameters <- NULL
+        estimate_prior <- NULL
+      }else{
+        estimate_function_name <- paste0(sub_method, "_estimation")
+        assign(estimate_function_name, get(estimate_function_name, envir = env))
+        ### prior information for estimation when it is unavailable
+        estimate_prior <- simulate_prior
+        if(sub_method == "scDesign3"){
+          if(is.null(prior_info$group.condition)){
+            if(!is.null(prior_info$group_num)){
+              estimate_prior[["group.condition"]] <- sample(1:prior_info$group_num, ncol(ref_data), TRUE)
+            }else{
+              estimate_prior[["group.condition"]] <- sample(1:2, ncol(ref_data), TRUE)
+            }
           }
         }
-      }
-      if(sub_method == "Lun2" | sub_method == "scDesign3"){
-        if(is.null(prior_info$batch.condition)){
-          if(!is.null(prior_info$batch_num)){
-            estimate_prior[["batch.condition"]] <- sample(1:prior_info$batch_num, ncol(ref_data), TRUE)
-          }else{
-            estimate_prior[["batch.condition"]] <- sample(1:2, ncol(ref_data), TRUE)
+        if(sub_method == "Lun2" | sub_method == "scDesign3"){
+          if(is.null(prior_info$batch.condition)){
+            if(!is.null(prior_info$batch_num)){
+              estimate_prior[["batch.condition"]] <- sample(1:prior_info$batch_num, ncol(ref_data), TRUE)
+            }else{
+              estimate_prior[["batch.condition"]] <- sample(1:2, ncol(ref_data), TRUE)
+            }
           }
         }
+        ##### spatial info
+        if(method == "SRTsim" & is.null(prior_info$spatial.x) |
+           method == "SRTsim" & is.null(prior_info$spatial.y) |
+           method == "scDesign3" & is.null(prior_info$spatial.x) & "spatial" %in% input$functionality |
+           method == "scDesign3" & is.null(prior_info$spatial.y) & "spatial" %in% input$functionality){
+          estimate_prior[["spatial.x"]] <- 1:ncol(ref_data)
+          estimate_prior[["spatial.y"]] <- 1:ncol(ref_data)
+        }
+        ### some methods can only specify the number of cell groups or batches in the estimation step
+        estimate_prior <- predetermine_parameters(method, estimate_prior)
+        estimation_prior <- list(ref_data = ref_data,
+                                 other_prior = list(group.condition = estimate_prior$group.condition,
+                                                    batch.condition = estimate_prior$batch.condition),
+                                 verbose = FALSE,
+                                 seed = as.integer(runif(1, min = 1, max = .Machine$integer.max)))
+        arguments <- estimation_prior[intersect(names(estimation_prior), names(formals(estimate_function_name)))]
+        estimated_parameters <- do.call(estimate_function_name, arguments)
+        parameters <- estimated_parameters$estimate_result
       }
-      ##### spatial info
-      if(method == "SRTsim" & is.null(prior_info$spatial.x) |
-         method == "SRTsim" & is.null(prior_info$spatial.y) |
-         method == "scDesign3" & is.null(prior_info$spatial.x) & "spatial" %in% input$functionality |
-         method == "scDesign3" & is.null(prior_info$spatial.y) & "spatial" %in% input$functionality){
-        estimate_prior[["spatial.x"]] <- 1:ncol(ref_data)
-        estimate_prior[["spatial.y"]] <- 1:ncol(ref_data)
-      }
-
-      estimation_prior <- list(ref_data = ref_data,
-                               other_prior = list(group.condition = estimate_prior$group.condition,
-                                                  batch.condition = estimate_prior$batch.condition),
-                               verbose = FALSE,
-                               seed = as.integer(runif(1, min = 1, max = .Machine$integer.max)))
-      arguments <- estimation_prior[intersect(names(estimation_prior), names(formals(estimate_function_name)))]
-      estimated_parameters <- do.call(estimate_function_name, arguments)
-      parameters <- estimated_parameters$estimate_result
       ############################################################################
       ############################ Simulate Datasets #############################
       ############################################################################
@@ -396,6 +449,8 @@ app_server <- function(input, output, session) {
                                         other_prior = simulate_prior,
                                         original_name = TRUE,
                                         function_name = TRUE)
+      new_prior[["cell_num"]] <- cell_num
+      new_prior[["gene_num"]] <- gene_num
       new_prior <- change_parameter_value(new_prior)
       ### add trajectory parameters
       if(isTRUE(simulate_prior$paths)){
@@ -436,7 +491,7 @@ app_server <- function(input, output, session) {
                                verbose = TRUE,
                                seed = as.integer(stats::runif(1, min = 1, max = .Machine$integer.max)))
       arguments <- simulation_prior[intersect(names(simulation_prior), names(formals(simulate_function_name)))]
-      if(sub_method == "SCRIP"){
+      if(sub_method == "SCRIP" | sub_method == "scDesign"){
         arguments[["ref_data"]] <- ref_data
       }
       simulated_datasets <- do.call(simulate_function_name, arguments)
