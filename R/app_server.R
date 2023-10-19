@@ -134,7 +134,19 @@ app_server <- function(input, output, session) {
                          value = 0,
                          min = 0,
                          max = 0)
+      updateNumericInput(session = session,
+                         inputId = "gene_num_simulate",
+                         label = "Gene Number",
+                         value = 1000,
+                         min = 1,
+                         max = 30000)
     }else if(!"gene_num" %in% names(check_data_size)){
+      updateNumericInput(session = session,
+                         inputId = "cell_num_simulate",
+                         label = "Cell Number",
+                         value = 1000,
+                         min = 1,
+                         max = 30000)
       updateNumericInput(session = session,
                          inputId = "gene_num_simulate",
                          label = "Gene number can not be set for this method",
@@ -208,7 +220,7 @@ app_server <- function(input, output, session) {
       }else{
         updateNumericInput(session,
                            inputId = "group_num",
-                           value = 2,
+                           value = 1,
                            min = 1,
                            max = 100)
       }
@@ -221,11 +233,19 @@ app_server <- function(input, output, session) {
                          max = 1)
     }
     if(!"batch" %in% selected_functionality){
-      updateNumericInput(session,
-                         inputId = "batch_num",
-                         value = 2,
-                         min = 1,
-                         max = 100)
+      if(method == "Lun2"){
+        updateNumericInput(session,
+                           inputId = "batch_num",
+                           value = 2,
+                           min = 2,
+                           max = 2)
+      }else{
+        updateNumericInput(session,
+                           inputId = "batch_num",
+                           value = 1,
+                           min = 1,
+                           max = 100)
+      }
     }
   })
 
@@ -405,8 +425,6 @@ app_server <- function(input, output, session) {
           if(is.null(prior_info$group.condition)){
             if(!is.null(prior_info$group_num)){
               estimate_prior[["group.condition"]] <- sample(1:prior_info$group_num, ncol(ref_data), TRUE)
-            }else{
-              estimate_prior[["group.condition"]] <- sample(1:2, ncol(ref_data), TRUE)
             }
           }
         }
@@ -414,8 +432,6 @@ app_server <- function(input, output, session) {
           if(is.null(prior_info$batch.condition)){
             if(!is.null(prior_info$batch_num)){
               estimate_prior[["batch.condition"]] <- sample(1:prior_info$batch_num, ncol(ref_data), TRUE)
-            }else{
-              estimate_prior[["batch.condition"]] <- sample(1:2, ncol(ref_data), TRUE)
             }
           }
         }
@@ -428,10 +444,12 @@ app_server <- function(input, output, session) {
           estimate_prior[["spatial.y"]] <- 1:ncol(ref_data)
         }
         ### some methods can only specify the number of cell groups or batches in the estimation step
-        estimate_prior <- predetermine_parameters(method, estimate_prior)
+        estimate_prior <- predetermine_parameters(method, estimate_prior, dim(ref_data))
         estimation_prior <- list(ref_data = ref_data,
                                  other_prior = list(group.condition = estimate_prior$group.condition,
-                                                    batch.condition = estimate_prior$batch.condition),
+                                                    batch.condition = estimate_prior$batch.condition,
+                                                    spatial.x = estimate_prior$spatial.x,
+                                                    spatial.y = estimate_prior$spatial.y),
                                  verbose = FALSE,
                                  seed = as.integer(runif(1, min = 1, max = .Machine$integer.max)))
         arguments <- estimation_prior[intersect(names(estimation_prior), names(formals(estimate_function_name)))]
@@ -519,7 +537,7 @@ app_server <- function(input, output, session) {
     if(methods::is(error, "try-error")){
       ### close the spinner
       shinycssloaders::hidePageSpinner()
-      output$error_return <- renderText(paste0("The simulation procedure failed. Please change another method or other parameters.\n",
+      output$error_return <- renderText(paste0("The simulation procedure failed. Please change another method or other parameters or raise an issue on Github.\n",
                                                as.character(error), "."))
     }else{
       shinycssloaders::hidePageSpinner()

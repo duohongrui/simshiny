@@ -61,7 +61,6 @@ method_parameters <- function(){
                                       "dyntoy",
                                       "Lun",
                                       "muscat",
-                                      "SRTsim",
                                       "Lun2",
                                       "Kersplat",
                                       "dropsim")),

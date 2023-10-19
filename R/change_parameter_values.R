@@ -95,6 +95,22 @@ change_parameter_value <- function(new_prior){
         new_prior <- new_prior[-which("cell_num" == names(new_prior))]
       }
     }
+    ##### cell.plates
+    if(!is.null(new_prior[["cell.plates"]])){
+      prop <- rep(round(1/2, digits = 2), 2)
+      prop[length(prop)] <- 1 - prop[1]
+      cell_number <- proportionate(number = new_prior[["cell_num"]],
+                                   result_sum_strict = new_prior[["cell_num"]],
+                                   prop = prop,
+                                   prop_sum_strict = 1,
+                                   digits = 0)
+      cell.plates <- c()
+      for(i in 1:2){
+        cell.plates <- append(cell.plates, rep(i, cell_number[i]))
+      }
+      new_prior[["cell.plates"]] <- cell.plates
+      new_prior <- new_prior[-which("cell_num" == names(new_prior))]
+    }
     #################################### DEGs
     if(!is.null(new_prior[["DEGs"]])){
       new_prior <- new_prior[-which("DEGs" == names(new_prior))]
