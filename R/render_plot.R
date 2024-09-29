@@ -70,7 +70,9 @@ render_funkyheatmap <- function(data){
 render_funkyheatmap_accuracy <- function(data){
 
   accuracy_data <- data %>%
-    dplyr::select(c(159, 1, 158, 11, 15:22, 61:62)) %>%
+    dplyr::select(c(" ", "Method", "recommend", "Accuracy",
+                    "KDE", "KS", "MAD", "MAE", "OV", "RMSE", "bhattacharyya", "multiKS",
+                    "acc_scRNA-seq data", "acc_spatial transcriptome data")) %>%
     dplyr::rename(
       "scRNA-seq data" = "acc_scRNA-seq data",
       "ST data" = "acc_spatial transcriptome data",
@@ -115,7 +117,9 @@ render_funkyheatmap_accuracy <- function(data){
 render_funkyheatmap_functionality <- function(data){
 
   functionality_data <- data %>%
-    dplyr::select(c(159, 1, 158, 12, 69, 76, 84, 92, 97:98)) %>%
+    dplyr::select(c(" ", "Method", "recommend", "Functionality",
+                    "Group_score", "DEGs_score", "Batch_score", "Trajectory_score",
+                    "func_scRNA-seq data", "func_spatial transcriptome data")) %>%
     dplyr::rename(
       "Group score" = "Group_score",
       "DEGs score" = "DEGs_score",
@@ -157,7 +161,9 @@ render_funkyheatmap_functionality <- function(data){
 render_funkyheatmap_scalability <- function(data){
 
   scalability_data <- data %>%
-    dplyr::select(c(159, 1, 158, 13, 122:127)) %>%
+    dplyr::select(c(" ", "Method", "recommend", "Scalability",
+                    "estimation time", "estimation memory", "simulation time", "simulation memory",
+                    "time", "memory")) %>%
     dplyr::rename(
       "Estimation time" = "estimation time",
       "Estimation memory" = "estimation memory",
@@ -199,7 +205,9 @@ render_funkyheatmap_usability <- function(data){
     dplyr::rename(
       "Error" = "error",
     ) %>%
-    dplyr::select(c(159, 1, 158, 14, 148:153, 66:67)) %>%
+    dplyr::select(c(" ", "Method", "recommend", "Usability",
+                    "Avalability", "Code", "Documentation", "Evaluation", "Maintenance", "Paper",
+                    "error_proportion", "Error")) %>%
     dplyr::mutate(
       dplyr::across(5:10, ~ round(.x, digits = 2))
     ) %>%
@@ -223,7 +231,7 @@ render_funkyheatmap_usability <- function(data){
                                   ### RColorBrewer::brewer.pal(9, "YlOrRd")[c(6,2)]
                                   formattable::area(col = 5:10) ~ formattable::color_tile("#FC4E2A", "#FFEDA0"),
                                   Error = formattable::formatter("span",
-                                                                 style = ~ formattable::style("font-size" = ifelse(error_proportion > 0.3, "13px", "10px"),
+                                                                 style = ~ formattable::style("font-size" = ifelse(error_proportion > 0.3, "13px", "12px"),
                                                                                               "color" = ifelse(error_proportion > 0.3, "red", "green"))),
                                   recommend = FALSE,
                                   error_proportion = FALSE))
